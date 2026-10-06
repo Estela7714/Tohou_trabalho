@@ -5,14 +5,12 @@ public class BossPattern_Low3 : BossBaseBehaviour
     public float moveSpeed = 6f;
     public float fireRate = 0.5f;
     private float fireTimer;
-    private float stateTime;
     private float startY;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         fireTimer = 0f;
-        stateTime = 0f;
         if (bossTransform != null) startY = bossTransform.position.y;
     }
 
@@ -20,19 +18,11 @@ public class BossPattern_Low3 : BossBaseBehaviour
     {
         if (boss == null || boss.isInvulnerable) return;
 
-        stateTime += Time.deltaTime;
+        // Movimento frenético
+        float newY = startY + Mathf.Sin(Time.time * moveSpeed) * 3.5f;
+        bossTransform.position = new Vector3(bossTransform.position.x, newY, 0);
 
-        // Movimento frenético mas contínuo
-        float targetY = startY + Mathf.Sin(stateTime * moveSpeed) * 3.5f;
-        Vector3 targetPos = new Vector3(bossTransform.position.x, targetY, 0);
-
-        bossTransform.position = Vector3.MoveTowards(
-            bossTransform.position,
-            targetPos,
-            10f * Time.deltaTime
-        );
-
-        // Anel massivo
+        // Anel massivo de 12 projéteis
         fireTimer += Time.deltaTime;
         if (fireTimer >= fireRate)
         {

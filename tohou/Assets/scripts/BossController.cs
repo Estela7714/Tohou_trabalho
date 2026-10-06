@@ -111,14 +111,13 @@ public class BossController : MonoBehaviour
 
     private void ClampBossPosition()
     {
-        // Converte a posição do chefe para coordenadas de Viewport (0.0 = canto inferior esquerdo, 1.0 = canto superior direito)
         Vector3 viewportPos = Camera.main.WorldToViewportPoint(transform.position);
 
-        // Permite que o Boss vá de 5% a 95% de TODA a tela (X e Y)
-        viewportPos.x = Mathf.Clamp(viewportPos.x, 0.05f, 0.95f);
-        viewportPos.y = Mathf.Clamp(viewportPos.y, 0.05f, 0.95f);
+        // Limites do Boss: mantém-no, por exemplo, na metade direita do ecrã (X entre 0.55 e 0.90) 
+        // e com margem em Y (0.10 a 0.90)
+        viewportPos.x = Mathf.Clamp(viewportPos.x, 0.55f, 0.90f);
+        viewportPos.y = Mathf.Clamp(viewportPos.y, 0.10f, 0.90f);
 
-        // Recompõe a posição final dentro do mundo do jogo
         transform.position = Camera.main.ViewportToWorldPoint(viewportPos);
     }
 }

@@ -4,33 +4,38 @@ public class BossPattern_Med1 : BossBaseBehaviour
 {
     public float moveSpeed = 3f;
     public float fireRate = 0.5f;
+    public float smoothSpeed = 5f; // Velocidade da transição de retorno
     private float fireTimer;
-    private float stateTime;
-    private Vector3 initialPos;
+    private static float? baseAnchorY = null;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         fireTimer = 0f;
-        stateTime = 0f;
-        if (bossTransform != null) initialPos = bossTransform.position;
+
+        // Regista o Y inicial central para não acumular desvios de posição
+        if (bossTransform != null && baseAnchorY == null)
+        {
+            baseAnchorY = bossTransform.position.y;
+        }
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (boss == null || boss.isInvulnerable) return;
 
-        stateTime += Time.deltaTime;
+        // Movimento em '8'
+        float x = Mathf.Sin(Time.time * moveSpeed) * 1.5f;
+        float y = Mathf.Sin(Time.time * moveSpeed * 2f) * 2.5f;
 
-        // Movimento em '8' suave baseado na posição de entrada
-        float x = Mathf.Sin(stateTime * moveSpeed) * 1.5f;
-        float y = Mathf.Sin(stateTime * moveSpeed * 2f) * 2.5f;
-        Vector3 targetPos = initialPos + new Vector3(x, y, 0);
+        float anchorY = baseAnchorY ?? bossTransform.position.y;
+        Vector3 targetPos = new Vector3(bossTransform.position.x + x, anchorY + y, bossTransform.position.z);
 
+        // Suaviza a posição em direção ao movimento em '8'
         bossTransform.position = Vector3.MoveTowards(
             bossTransform.position,
             targetPos,
-            6f * Time.deltaTime
+            smoothSpeed * Time.deltaTime
         );
 
         // Disparo Quádruplo

@@ -8,14 +8,21 @@ public class BossPattern_High1 : BossBaseBehaviour
 
     private float fireTimer;
     private float stateTime;
-    private float startY;
+
+    // Variável estática para memorizar o Y inicial absoluto do Boss na cena
+    private static float? initialBossY = null;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         fireTimer = 0f;
         stateTime = 0f;
-        if (bossTransform != null) startY = bossTransform.position.y;
+
+        // Regista o Y original apenas na primeira vez que entra no estado
+        if (bossTransform != null && initialBossY == null)
+        {
+            initialBossY = bossTransform.position.y;
+        }
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -24,18 +31,14 @@ public class BossPattern_High1 : BossBaseBehaviour
 
         stateTime += Time.deltaTime;
 
-        // Calcula onde o Boss DEVERIA estar
-        float targetY = startY + Mathf.Sin(stateTime * moveSpeed) * moveAmount;
-        Vector3 targetPosition = new Vector3(bossTransform.position.x, targetY, 0);
+        // Calcula a posição Y em relação ao centro original fixo
+        float targetY = (initialBossY ?? bossTransform.position.y) + (Mathf.Sin(stateTime * moveSpeed) * moveAmount);
 
-        // Move o Boss de forma gradual e fluida até o alvo (elimina o salto instantâneo!)
-        bossTransform.position = Vector3.MoveTowards(
-            bossTransform.position,
-            targetPosition,
-            5f * Time.deltaTime
-        );
+        // Suaviza o movimento vindo de outros estados sem acumular posições
+        float smoothedY = Mathf.MoveTowards(bossTransform.position.y, targetY, 5f * Time.deltaTime);
+        bossTransform.position = new Vector3(bossTransform.position.x, smoothedY, bossTransform.position.z);
 
-        // Disparo Frontal
+        // Disparo
         fireTimer += Time.deltaTime;
         if (fireTimer >= fireRate)
         {

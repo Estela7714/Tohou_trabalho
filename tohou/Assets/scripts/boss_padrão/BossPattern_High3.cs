@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BossPattern_High3 : BossBaseBehaviour
 {
-    public float followSpeed = 3f;
+    public float followSpeed = 1.5f;
     public float fireRate = 0.9f;
     private float fireTimer;
     private Transform playerTransform;
@@ -19,16 +19,12 @@ public class BossPattern_High3 : BossBaseBehaviour
     {
         if (boss == null || boss.isInvulnerable) return;
 
-        // Perseguição em Y suave sem saltos
+        // Segue suavemente o eixo Y do jogador
         if (playerTransform != null)
         {
             float targetY = playerTransform.position.y;
-            Vector3 targetPos = new Vector3(bossTransform.position.x, targetY, 0);
-            bossTransform.position = Vector3.MoveTowards(
-                bossTransform.position,
-                targetPos,
-                followSpeed * Time.deltaTime
-            );
+            float newY = Mathf.Lerp(bossTransform.position.y, targetY, followSpeed * Time.deltaTime);
+            bossTransform.position = new Vector3(bossTransform.position.x, newY, 0);
         }
 
         // Tiro Triplo

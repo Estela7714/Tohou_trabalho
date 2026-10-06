@@ -3,6 +3,7 @@ using UnityEngine;
 public class BossPattern_Med3 : BossBaseBehaviour
 {
     public float fireRate = 0.7f;
+    public float smoothReturnSpeed = 3f;
     private float fireTimer;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -14,6 +15,13 @@ public class BossPattern_Med3 : BossBaseBehaviour
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (boss == null || boss.isInvulnerable) return;
+
+        // Desacelera e desacopla o movimento suavemente se o Boss vinha com aceleração de outro estado
+        bossTransform.position = Vector3.MoveTowards(
+            bossTransform.position,
+            bossTransform.position,
+            smoothReturnSpeed * Time.deltaTime
+        );
 
         fireTimer += Time.deltaTime;
         if (fireTimer >= fireRate)
