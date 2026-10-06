@@ -5,12 +5,14 @@ public class BossPattern_Med1 : BossBaseBehaviour
     public float moveSpeed = 3f;
     public float fireRate = 0.5f;
     private float fireTimer;
+    private float stateTime;
     private Vector3 initialPos;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         fireTimer = 0f;
+        stateTime = 0f;
         if (bossTransform != null) initialPos = bossTransform.position;
     }
 
@@ -18,10 +20,18 @@ public class BossPattern_Med1 : BossBaseBehaviour
     {
         if (boss == null || boss.isInvulnerable) return;
 
-        // Movimento em '8'
-        float x = Mathf.Sin(Time.time * moveSpeed) * 1.5f;
-        float y = Mathf.Sin(Time.time * moveSpeed * 2f) * 2.5f;
-        bossTransform.position = initialPos + new Vector3(x, y, 0);
+        stateTime += Time.deltaTime;
+
+        // Movimento em '8' suave baseado na posição de entrada
+        float x = Mathf.Sin(stateTime * moveSpeed) * 1.5f;
+        float y = Mathf.Sin(stateTime * moveSpeed * 2f) * 2.5f;
+        Vector3 targetPos = initialPos + new Vector3(x, y, 0);
+
+        bossTransform.position = Vector3.MoveTowards(
+            bossTransform.position,
+            targetPos,
+            6f * Time.deltaTime
+        );
 
         // Disparo Quádruplo
         fireTimer += Time.deltaTime;

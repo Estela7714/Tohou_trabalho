@@ -6,11 +6,13 @@ public class Projectile : MonoBehaviour
     private Vector2 direction;
     private float speed;
     private int damage;
-    private IObjectPool<Projectile> pool;
 
-    public void SetPool(IObjectPool<Projectile> poolRef)
+    // Referência para a pool nativa do Unity
+    private IObjectPool<Projectile> originPool;
+
+    public void SetPool(IObjectPool<Projectile> pool)
     {
-        pool = poolRef;
+        originPool = pool;
     }
 
     public void Launch(Vector2 dir, float spd, int dmg)
@@ -21,38 +23,50 @@ public class Projectile : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    private void Update()
+    void Update()
     {
         transform.Translate(direction * speed * Time.deltaTime, Space.World);
 
-        // Desativa/Retorna à pool se sair da tela
-        Vector3 screenPos = Camera.main.WorldToViewportPoint(transform.position);
-        if (screenPos.x < -0.1f || screenPos.x > 1.1f || screenPos.y < -0.1f || screenPos.y > 1.1f)
+        // Se sair dos limites do ecrã, devolve à pool
+        if (Mathf.Abs(transform.position.x) > 15f || Mathf.Abs(transform.position.y) > 10f)
         {
-            ReleaseToPool();
-        }
-    }
-
-    public void ReleaseToPool()
-    {
-        if (gameObject.activeSelf)
-        {
-            pool?.Release(this);
+            Deactivate();
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Tratar colisões com Player/Boss
-        if (collision.CompareTag("Boss") && CompareTag("PlayerBullet"))
+        // Se for uma bala disparada pelo Jogador e atingir o Boss
+        if (CompareTag("PlayerBullet") && collision.CompareTag("Boss"))
         {
-            collision.GetComponent<BossController>()?.TakeDamage(damage);
-            ReleaseToPool();
+            BossController boss = collision.GetComponent<BossController>();
+            if (boss != null)
+            {
+                boss.TakeDamage(damage);
+            }
+            Deactivate();
         }
-        else if (collision.CompareTag("Player") && CompareTag("BossBullet"))
+        // Se for uma bala disparada pelo Boss e atingir o Jogador
+        else if (CompareTag("BossBullet") && collision.CompareTag("Player"))
         {
-            collision.GetComponent<PlayerController>()?.TakeDamage(damage);
-            ReleaseToPool();
+            PlayerController player = collision.GetComponent<PlayerController>();
+            if (player != null)
+            {
+                player.TakeDamage(damage);
+            }
+            Deactivate();
+        }
+    }
+
+    private void Deactivate()
+    {
+        if (originPool != null)
+        {
+            originPool.Release(this);
+        }
+        else
+        {
+            gameObject.SetActive(false);
         }
     }
 }

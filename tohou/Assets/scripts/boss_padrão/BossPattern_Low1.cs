@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BossPattern_Low1 : BossBaseBehaviour
 {
-    public float followSpeed = 3.5f;
+    public float followSpeed = 5f;
     public float fireRate = 0.35f;
     private float fireTimer;
     private Transform playerTransform;
@@ -19,12 +19,16 @@ public class BossPattern_Low1 : BossBaseBehaviour
     {
         if (boss == null || boss.isInvulnerable) return;
 
-        // Perseguição em Y muito rápida
+        // Perseguição rápida e suave
         if (playerTransform != null)
         {
             float targetY = playerTransform.position.y;
-            float newY = Mathf.Lerp(bossTransform.position.y, targetY, followSpeed * Time.deltaTime);
-            bossTransform.position = new Vector3(bossTransform.position.x, newY, 0);
+            Vector3 targetPos = new Vector3(bossTransform.position.x, targetY, 0);
+            bossTransform.position = Vector3.MoveTowards(
+                bossTransform.position,
+                targetPos,
+                followSpeed * Time.deltaTime
+            );
         }
 
         fireTimer += Time.deltaTime;

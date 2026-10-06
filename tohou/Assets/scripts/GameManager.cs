@@ -108,7 +108,7 @@ public class GameManager : MonoBehaviour
             if (defeatPanel != null) defeatPanel.SetActive(true);
         }
 
-        // Congela a física e atualizações do jogo
+        // Congela o tempo do jogo (para movimentos, tiros e física)
         Time.timeScale = 0f;
     }
 

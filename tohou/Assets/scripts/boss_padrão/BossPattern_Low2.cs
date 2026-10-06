@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BossPattern_Low2 : BossBaseBehaviour
 {
-    public float fireRate = 0.15f; // Frequência extrema
+    public float fireRate = 0.15f;
     public float rotationSpeed = 90f;
     private float fireTimer;
     private float currentAngle;
@@ -25,7 +25,6 @@ public class BossPattern_Low2 : BossBaseBehaviour
         {
             fireTimer = 0f;
 
-            // Dispara 2 tiros opostos girando continuamente
             Vector2 dir1 = Quaternion.Euler(0, 0, currentAngle) * Vector2.left;
             Vector2 dir2 = Quaternion.Euler(0, 0, currentAngle + 180f) * Vector2.left;
 

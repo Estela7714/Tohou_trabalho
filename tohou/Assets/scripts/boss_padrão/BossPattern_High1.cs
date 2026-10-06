@@ -5,13 +5,16 @@ public class BossPattern_High1 : BossBaseBehaviour
     public float moveSpeed = 2f;
     public float moveAmount = 2.5f;
     public float fireRate = 0.8f;
+
     private float fireTimer;
+    private float stateTime;
     private float startY;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
         fireTimer = 0f;
+        stateTime = 0f;
         if (bossTransform != null) startY = bossTransform.position.y;
     }
 
@@ -19,11 +22,20 @@ public class BossPattern_High1 : BossBaseBehaviour
     {
         if (boss == null || boss.isInvulnerable) return;
 
-        // Movimento suave para cima e para baixo
-        float newY = startY + Mathf.Sin(Time.time * moveSpeed) * moveAmount;
-        bossTransform.position = new Vector3(bossTransform.position.x, newY, 0);
+        stateTime += Time.deltaTime;
 
-        // Tiro Frontal Simples
+        // Calcula onde o Boss DEVERIA estar
+        float targetY = startY + Mathf.Sin(stateTime * moveSpeed) * moveAmount;
+        Vector3 targetPosition = new Vector3(bossTransform.position.x, targetY, 0);
+
+        // Move o Boss de forma gradual e fluida até o alvo (elimina o salto instantâneo!)
+        bossTransform.position = Vector3.MoveTowards(
+            bossTransform.position,
+            targetPosition,
+            5f * Time.deltaTime
+        );
+
+        // Disparo Frontal
         fireTimer += Time.deltaTime;
         if (fireTimer >= fireRate)
         {

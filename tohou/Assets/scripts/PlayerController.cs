@@ -46,6 +46,20 @@ public class PlayerController : MonoBehaviour
     {
         Move();
         HandleShooting();
+        ClampPosition(); // Restringe a posição
+    }
+
+    private void ClampPosition()
+    {
+        // Converte a posição atual do jogador para coordenadas de Viewport (0.0 até 1.0)
+        Vector3 viewportPos = Camera.main.WorldToViewportPoint(transform.position);
+
+        // Limita o X e Y entre 5% e 95% do ecrã para a navinha não encostar completamente na borda
+        viewportPos.x = Mathf.Clamp(viewportPos.x, 0.05f, 0.95f);
+        viewportPos.y = Mathf.Clamp(viewportPos.y, 0.05f, 0.95f);
+
+        // Converte de volta para coordenadas do mundo
+        transform.position = Camera.main.ViewportToWorldPoint(viewportPos);
     }
 
     private void Move()
@@ -87,8 +101,13 @@ public class PlayerController : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            currentHealth = 0;
+
+            // Chama a tela de Game Over no GameManager (Derrota)
+            GameManager.Instance?.GameOver(false);
+
+            // Desativa o jogador para ele sumir e não continuar a atirar/mover
             gameObject.SetActive(false);
-            GameManager.Instance?.GameOver(false); // Derrota
         }
     }
 }

@@ -82,17 +82,43 @@ public class BossController : MonoBehaviour
         isInvulnerable = true;
         currentPhase = newPhase;
 
-        // Feedback visual de Invulnerabilidade (pode piscar ou mudar a cor para cinza/transparente)
-        Color originalColor = spriteRenderer.color;
-        spriteRenderer.color = new Color(1, 1, 1, 0.4f);
-
         // Dispara a transição de fase no Animator
         animator.SetTrigger(triggerName);
 
-        // Aguarda os 2 segundos obrigatórios
-        yield return new WaitForSeconds(2.0f);
+        // Efeito de piscar suave durante os 2 segundos de invulnerabilidade
+        float elapsed = 0f;
+        float duration = 2.0f;
 
-        spriteRenderer.color = originalColor;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+
+            // Faz a transparência (Alpha) oscilar suavemente entre 0.3 e 1.0
+            float alpha = Mathf.PingPong(elapsed * 5f, 0.7f) + 0.3f;
+            spriteRenderer.color = new Color(1f, 1f, 1f, alpha);
+
+            yield return null;
+        }
+
+        // Restaura a opacidade original e remove invulnerabilidade
+        spriteRenderer.color = Color.white;
         isInvulnerable = false;
+    }
+    private void LateUpdate()
+    {
+        ClampBossPosition();
+    }
+
+    private void ClampBossPosition()
+    {
+        // Converte a posição do chefe para coordenadas de Viewport (0.0 = canto inferior esquerdo, 1.0 = canto superior direito)
+        Vector3 viewportPos = Camera.main.WorldToViewportPoint(transform.position);
+
+        // Permite que o Boss vá de 5% a 95% de TODA a tela (X e Y)
+        viewportPos.x = Mathf.Clamp(viewportPos.x, 0.05f, 0.95f);
+        viewportPos.y = Mathf.Clamp(viewportPos.y, 0.05f, 0.95f);
+
+        // Recompõe a posição final dentro do mundo do jogo
+        transform.position = Camera.main.ViewportToWorldPoint(viewportPos);
     }
 }

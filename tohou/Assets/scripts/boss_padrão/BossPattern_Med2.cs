@@ -19,19 +19,21 @@ public class BossPattern_Med2 : BossBaseBehaviour
     {
         if (boss == null || boss.isInvulnerable) return;
 
-        // Movimento de avanço e recuo no eixo X
+        // Avanço e recuo com interpolação de limites
         if (movingForward)
         {
-            bossTransform.position += Vector3.left * moveSpeed * Time.deltaTime;
-            if (bossTransform.position.x <= startPos.x - 3f) movingForward = false;
+            Vector3 target = new Vector3(startPos.x - 3f, bossTransform.position.y, 0);
+            bossTransform.position = Vector3.MoveTowards(bossTransform.position, target, moveSpeed * Time.deltaTime);
+            if (Vector3.Distance(bossTransform.position, target) < 0.1f) movingForward = false;
         }
         else
         {
-            bossTransform.position += Vector3.right * moveSpeed * Time.deltaTime;
-            if (bossTransform.position.x >= startPos.x) movingForward = true;
+            Vector3 target = new Vector3(startPos.x, bossTransform.position.y, 0);
+            bossTransform.position = Vector3.MoveTowards(bossTransform.position, target, moveSpeed * Time.deltaTime);
+            if (Vector3.Distance(bossTransform.position, target) < 0.1f) movingForward = true;
         }
 
-        // Tiro direcionado diretamente à posição atual do jogador
+        // Tiro direcionado
         fireTimer += Time.deltaTime;
         if (fireTimer >= fireRate)
         {
