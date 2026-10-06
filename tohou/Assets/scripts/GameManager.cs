@@ -17,10 +17,10 @@ public class GameManager : MonoBehaviour
     [Tooltip("Arraste aqui o componente Image do Fill da barra de vida")]
     public Image bossHealthFill;
 
-    [Header("Cores da Barra do Chefão por Fase")]
+    [Header("Cores da Barra do Chefão por Porcentagem")]
     public Color phaseHighColor = Color.green;   // Vida > 50%
-    public Color phaseMediumColor = Color.yellow; // 50% >= Vida > 20%
-    public Color phaseLowColor = Color.red;      // Vida <= 20%
+    public Color phaseMediumColor = Color.yellow; // 50% >= Vida >= 20%
+    public Color phaseLowColor = Color.red;      // Vida < 20%
 
     [Header("Telas de Fim de Jogo")]
     public GameObject victoryPanel;
@@ -72,24 +72,30 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void UpdateBossUI(float currentHealth, float maxHealth, BossController.Phase phase)
     {
+        if (maxHealth <= 0) return;
+
+        float healthPercent = currentHealth / maxHealth;
+
+        // 1. Atualiza o valor da Slider (0 a 1)
         if (bossHealthSlider != null)
         {
-            bossHealthSlider.value = Mathf.Clamp01(currentHealth / maxHealth);
+            bossHealthSlider.value = Mathf.Clamp01(healthPercent);
         }
 
+        // 2. Altera a cor com base na porcentagem de vida exata
         if (bossHealthFill != null)
         {
-            switch (phase)
+            if (healthPercent > 0.5f)
             {
-                case BossController.Phase.High:
-                    bossHealthFill.color = phaseHighColor;
-                    break;
-                case BossController.Phase.Medium:
-                    bossHealthFill.color = phaseMediumColor;
-                    break;
-                case BossController.Phase.Low:
-                    bossHealthFill.color = phaseLowColor;
-                    break;
+                bossHealthFill.color = phaseHighColor; // Verde (> 50%)
+            }
+            else if (healthPercent >= 0.2f)
+            {
+                bossHealthFill.color = phaseMediumColor; // Amarelo (50% a 20%)
+            }
+            else
+            {
+                bossHealthFill.color = phaseLowColor; // Vermelho (< 20%)
             }
         }
     }
@@ -118,7 +124,7 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         Time.timeScale = 1f;
-        // Recarrega a cena do jogo (garanta que o nome seja 'Game')
+        // Recarrega a cena do jogo
         SceneManager.LoadScene("Game");
     }
 }
