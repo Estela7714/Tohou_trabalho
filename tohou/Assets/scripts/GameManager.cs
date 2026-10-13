@@ -31,10 +31,11 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        // Configuração do Singleton
+        // Configuração do Singleton com persistência entre cenas
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject); // Garante que o GameManager persista nas transições
         }
         else
         {
@@ -42,15 +43,36 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    // Chamado automaticamente sempre que uma nova cena for carregada
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ResetGameState();
+    }
+
     private void Start()
     {
-        // Garante que as telas de fim de jogo comecem desativadas
+        ResetGameState();
+    }
+
+    /// <summary>
+    /// Reseta o estado do jogo e as telas de UI ao reiniciar/carregar a cena.
+    /// </summary>
+    private void ResetGameState()
+    {
         if (victoryPanel != null) victoryPanel.SetActive(false);
         if (defeatPanel != null) defeatPanel.SetActive(false);
 
         isGameOver = false;
-
-        // Despausa o jogo ao iniciar/reiniciar
         Time.timeScale = 1f;
     }
 
