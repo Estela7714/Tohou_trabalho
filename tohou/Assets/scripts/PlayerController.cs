@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
+        // Atualiza a UI para mostrar os 3 ícones no início
         GameManager.Instance?.UpdatePlayerUI(currentHealth);
     }
 
@@ -46,7 +47,7 @@ public class PlayerController : MonoBehaviour
     {
         Move();
         HandleShooting();
-        ClampPosition(); // Restringe a posição
+        ClampPosition(); // Restringe a posição na borda do ecrã
     }
 
     private void ClampPosition()
@@ -68,12 +69,6 @@ public class PlayerController : MonoBehaviour
         float moveY = Input.GetAxisRaw("Vertical");
         Vector3 dir = new Vector3(moveX, moveY, 0).normalized;
         transform.position += dir * speed * Time.deltaTime;
-
-        // Restringir a navinha dentro dos limites da Câmera
-        Vector3 pos = Camera.main.WorldToViewportPoint(transform.position);
-        pos.x = Mathf.Clamp(pos.x, 0.05f, 0.95f);
-        pos.y = Mathf.Clamp(pos.y, 0.05f, 0.95f);
-        transform.position = Camera.main.ViewportToWorldPoint(pos);
     }
 
     private void HandleShooting()
@@ -97,6 +92,7 @@ public class PlayerController : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
+        // Atualiza a UI removendo os círculos de vida conforme o dano
         GameManager.Instance?.UpdatePlayerUI(currentHealth);
 
         if (currentHealth <= 0)

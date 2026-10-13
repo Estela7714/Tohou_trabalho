@@ -26,6 +26,9 @@ public class GameManager : MonoBehaviour
     public GameObject victoryPanel;
     public GameObject defeatPanel;
 
+    // Controla se a partida já terminou para escutar a tecla R
+    private bool isGameOver = false;
+
     private void Awake()
     {
         // Configuração do Singleton
@@ -45,8 +48,19 @@ public class GameManager : MonoBehaviour
         if (victoryPanel != null) victoryPanel.SetActive(false);
         if (defeatPanel != null) defeatPanel.SetActive(false);
 
+        isGameOver = false;
+
         // Despausa o jogo ao iniciar/reiniciar
         Time.timeScale = 1f;
+    }
+
+    private void Update()
+    {
+        // Se o jogo acabou (Vitória ou Derrota) e o jogador pressionou 'R', recarrega a partida
+        if (isGameOver && Input.GetKeyDown(KeyCode.R))
+        {
+            RestartGame();
+        }
     }
 
     /// <summary>
@@ -74,12 +88,13 @@ public class GameManager : MonoBehaviour
     {
         if (maxHealth <= 0) return;
 
-        float healthPercent = currentHealth / maxHealth;
+        // Calcula a porcentagem normalizada da vida (0.0 a 1.0)
+        float healthPercent = Mathf.Clamp01(currentHealth / maxHealth);
 
-        // 1. Atualiza o valor da Slider (0 a 1)
+        // 1. Atualiza o valor da Slider
         if (bossHealthSlider != null)
         {
-            bossHealthSlider.value = Mathf.Clamp01(healthPercent);
+            bossHealthSlider.value = healthPercent;
         }
 
         // 2. Altera a cor com base na porcentagem de vida exata
@@ -105,6 +120,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void GameOver(bool isVictory)
     {
+        isGameOver = true;
+
         if (isVictory)
         {
             if (victoryPanel != null) victoryPanel.SetActive(true);
@@ -119,7 +136,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Método chamado pelo botão "Tentar Novamente" na tela de derrota.
+    /// Método chamado pelo botão "Tentar Novamente" na UI ou via atalho da tecla 'R'.
     /// </summary>
     public void RestartGame()
     {
