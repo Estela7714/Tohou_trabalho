@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class BossPattern_High1 : BossBaseBehaviour
 {
-    public float moveSpeed = 2f;
-    public float moveAmount = 2.5f;
+    public float moveSpeed = 3.5f;
+    public float moveAmount = 4.5f;
     public float fireRate = 0.8f;
 
     private float fireTimer;

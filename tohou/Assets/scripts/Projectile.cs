@@ -10,6 +10,9 @@ public class Projectile : MonoBehaviour
     // Referência para a pool nativa do Unity
     private IObjectPool<Projectile> originPool;
 
+    // Trava para evitar devolver o mesmo tiro duas vezes para a pool
+    private bool isDeactivated = false;
+
     public void SetPool(IObjectPool<Projectile> pool)
     {
         originPool = pool;
@@ -20,11 +23,14 @@ public class Projectile : MonoBehaviour
         direction = dir.normalized;
         speed = spd;
         damage = dmg;
+        isDeactivated = false; // Reseta a trava ao reativar da pool
         gameObject.SetActive(true);
     }
 
     void Update()
     {
+        if (isDeactivated) return;
+
         transform.Translate(direction * speed * Time.deltaTime, Space.World);
 
         // Se sair dos limites do ecrã, devolve à pool
@@ -36,6 +42,8 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (isDeactivated) return;
+
         // Se for uma bala disparada pelo Jogador e atingir o Boss
         if (CompareTag("PlayerBullet") && collision.CompareTag("Boss"))
         {
@@ -60,6 +68,10 @@ public class Projectile : MonoBehaviour
 
     private void Deactivate()
     {
+        // Garante que só devolve à pool se ainda não tiver sido desativado neste ciclo
+        if (isDeactivated) return;
+        isDeactivated = true;
+
         if (originPool != null)
         {
             originPool.Release(this);
